@@ -140,9 +140,13 @@ export default function Dashboard() {
 
   // Filter tickets based on role
   const filteredTickets = tickets.filter(ticket => {
-    // Regular TA can only see assigned tickets
-    if (!isAdmin && !ticket.assigned_tas?.includes(user?.email)) {
-      return false;
+    // Regular TA can only see assigned tickets or unassigned tickets
+    if (!isAdmin) {
+      const isAssignedToMe = ticket.assigned_tas?.includes(user?.email);
+      const isUnassigned = !ticket.assigned_tas || ticket.assigned_tas.length === 0;
+      if (!isAssignedToMe && !isUnassigned) {
+        return false;
+      }
     }
 
     // Apply filters
@@ -298,7 +302,7 @@ ${ticket.description}
             דשבורד פניות
           </h1>
           <p className="text-slate-600 mt-1">
-            {isAdmin ? "ניהול כל הפניות" : "הפניות שהוקצו אליך"}
+            {isAdmin ? "ניהול כל הפניות" : "הפניות שלי ופניות חדשות"}
           </p>
         </div>
       </div>

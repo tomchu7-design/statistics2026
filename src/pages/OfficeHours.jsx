@@ -185,7 +185,7 @@ export default function OfficeHours() {
         reminder_sent: false,
       });
 
-      // Try to send confirmation email
+      // Send confirmation email to student with zoom link
       try {
         await base44.integrations.Core.SendEmail({
           to: user.email,
@@ -194,17 +194,43 @@ export default function OfficeHours() {
 
 פגישתך נקבעה בהצלחה!
 
-מתרגל/ת: ${selectedSlot.availability.ta_name}
+מתרגלת: ${selectedSlot.availability.ta_name}
 תאריך: ${format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he })}
 שעה: ${selectedSlot.start} - ${selectedSlot.end}
 נושא: ${categoryConfig[bookingTopic]?.label || bookingTopic}
-${selectedSlot.availability.location ? `מיקום: ${selectedSlot.availability.location}` : ''}
+${selectedSlot.availability.zoom_link ? `קישור זום: ${selectedSlot.availability.zoom_link}` : ''}
+
+תזכורת תישלח אליך 24 שעות לפני הפגישה.
 
 בברכה,
 צוות קורס סטטיסטיקה`
         });
       } catch (e) {
-        console.log("Email could not be sent");
+        console.log("Email could not be sent to student");
+      }
+
+      // Send notification to TA
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: selectedSlot.availability.ta_email,
+          subject: `פגישה חדשה נקבעה - ${user.full_name}`,
+          body: `שלום ${selectedSlot.availability.ta_name},
+
+סטודנט/ית קבע/ה פגישה איתך:
+
+סטודנט/ית: ${user.full_name} (${user.email})
+תאריך: ${format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he })}
+שעה: ${selectedSlot.start} - ${selectedSlot.end}
+נושא: ${categoryConfig[bookingTopic]?.label || bookingTopic}
+${bookingNotes ? `הערות: ${bookingNotes}` : ''}
+
+תוכלי לראות את הפגישה בדשבורד שלך.
+
+בברכה,
+מערכת שעות קבלה`
+        });
+      } catch (e) {
+        console.log("Email could not be sent to TA");
       }
 
       toast.success("הפגישה נקבעה בהצלחה!");
