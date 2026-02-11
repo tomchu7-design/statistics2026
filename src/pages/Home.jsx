@@ -83,10 +83,8 @@ export default function Home() {
   const categories = [
     { key: "course_admin", icon: BookOpen },
     { key: "assignments", icon: FileText },
+    { key: "quiz", icon: HelpCircle },
     { key: "exam", icon: ClipboardList },
-    { key: "statistics_content", icon: BarChart3 },
-    { key: "excel", icon: Table2 },
-    { key: "technical", icon: Monitor },
   ];
 
   return (

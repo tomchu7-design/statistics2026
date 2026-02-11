@@ -53,7 +53,6 @@ export default function NewTicket() {
     student_id: "",
     category: "",
     subtopic: "",
-    urgency: "medium",
     subject: initialSubject,
     description: "",
     attachment_url: "",
@@ -131,6 +130,7 @@ export default function NewTicket() {
       
       await base44.entities.Ticket.create({
         ...formData,
+        urgency: "medium",
         ticket_number: newTicketNumber,
         status: "new",
         assigned_tas: [],
@@ -317,41 +317,22 @@ export default function NewTicket() {
             <div className="space-y-4">
               <h3 className="font-semibold text-slate-900 border-b pb-2">פרטי הפנייה</h3>
               
-              <div className="grid sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>קטגוריה *</Label>
-                  <Select
-                    value={formData.category}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
-                  >
-                    <SelectTrigger className={errors.category ? "border-red-300" : ""}>
-                      <SelectValue placeholder="בחרו קטגוריה" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(categoryConfig).filter(([k]) => k !== "general").map(([key, config]) => (
-                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label>דחיפות</Label>
-                  <Select
-                    value={formData.urgency}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, urgency: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(urgencyConfig).map(([key, config]) => (
-                        <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label>קטגוריה *</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, category: value }))}
+                >
+                  <SelectTrigger className={errors.category ? "border-red-300" : ""}>
+                    <SelectValue placeholder="בחרו קטגוריה" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(categoryConfig).filter(([k]) => k !== "general").map(([key, config]) => (
+                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.category && <p className="text-red-500 text-sm">{errors.category}</p>}
               </div>
 
               <div className="space-y-2">
