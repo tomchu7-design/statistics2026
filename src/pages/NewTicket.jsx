@@ -148,9 +148,10 @@ export default function NewTicket() {
       setTicketNumber(newTicketNumber);
       setSubmitted(true);
 
-      // Try to send confirmation email
+      // Send emails
       if (formData.email_consent) {
         try {
+          // Email to student
           await base44.integrations.Core.SendEmail({
             to: formData.student_email,
             subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
@@ -170,6 +171,34 @@ export default function NewTicket() {
         } catch (emailError) {
           console.log("Email could not be sent");
         }
+      }
+
+      // Email to staff
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: "statisticshaifa26@gmail.com",
+          subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
+          body: `פנייה חדשה התקבלה במערכת:
+
+מספר פנייה: ${newTicketNumber}
+מאת: ${formData.student_name}
+אימייל: ${formData.student_email}
+${formData.student_id ? `ת.ז: ${formData.student_id}` : ''}
+
+קטגוריה: ${categoryConfig[formData.category]?.label || formData.category}
+${formData.subtopic ? `תת-נושא: ${formData.subtopic}` : ''}
+נושא: ${formData.subject}
+
+תוכן הפנייה:
+${formData.description}
+
+${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : ''}
+
+---
+ניתן לטפל בפנייה דרך מערכת הדשבורד`
+        });
+      } catch (emailError) {
+        console.log("Staff email could not be sent");
       }
 
     } catch (error) {

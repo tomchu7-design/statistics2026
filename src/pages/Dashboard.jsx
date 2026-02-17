@@ -191,6 +191,31 @@ export default function Dashboard() {
         details: isInternal ? "הוספת הערה פנימית" : "הוספת תגובה",
       });
 
+      // Send email to student if it's not an internal note
+      if (!isInternal && selectedTicket.email_consent) {
+        try {
+          await base44.integrations.Core.SendEmail({
+            to: selectedTicket.student_email,
+            subject: `תגובה חדשה לפנייה ${selectedTicket.ticket_number} - קורס סטטיסטיקה`,
+            body: `שלום ${selectedTicket.student_name},
+
+קיבלת תגובה חדשה לפנייה שלך:
+
+מספר פנייה: ${selectedTicket.ticket_number}
+נושא: ${selectedTicket.subject}
+
+תגובה מ${user.full_name}:
+${message}
+
+---
+בברכה,
+צוות קורס סטטיסטיקה`
+          });
+        } catch (emailError) {
+          console.log("Email to student could not be sent");
+        }
+      }
+
       if (isInternal) {
         setNewInternalNote("");
       } else {
