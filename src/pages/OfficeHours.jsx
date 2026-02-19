@@ -359,7 +359,7 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
                   <SelectValue placeholder="כל המתרגלים" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">כל המתרגלים</SelectItem>
+                  <SelectItem value="all">כל המתרגלות</SelectItem>
                   {tas.map((ta) => (
                     <SelectItem key={ta.email} value={ta.email}>{ta.name}</SelectItem>
                   ))}
