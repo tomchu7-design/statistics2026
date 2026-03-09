@@ -148,37 +148,11 @@ export default function NewTicket() {
       setTicketNumber(newTicketNumber);
       setSubmitted(true);
 
-      // Send emails
-      if (formData.email_consent) {
-        try {
-          // Email to student
-          await base44.integrations.Core.SendEmail({
-            to: formData.student_email,
-            subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
-            body: `שלום ${formData.student_name},
-
-פנייתך התקבלה בהצלחה!
-
-מספר פנייה: ${newTicketNumber}
-נושא: ${formData.subject}
-קטגוריה: ${categoryConfig[formData.category]?.label || formData.category}
-
-צוות הקורס יחזור אליך בהקדם האפשרי.
-
-בברכה,
-צוות קורס סטטיסטיקה`
-          });
-        } catch (emailError) {
-          console.log("Email could not be sent");
-        }
-      }
-
-      // Email to staff
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: "statisticshaifa26@gmail.com",
-          subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
-          body: `פנייה חדשה התקבלה במערכת:
+      // Email to staff - always sent
+      await base44.integrations.Core.SendEmail({
+        to: "statisticshaifa26@gmail.com",
+        subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
+        body: `פנייה חדשה התקבלה במערכת:
 
 מספר פנייה: ${newTicketNumber}
 מאת: ${formData.student_name}
@@ -196,9 +170,26 @@ ${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : 
 
 ---
 ניתן לטפל בפנייה דרך מערכת הדשבורד`
+      });
+
+      // Email to student
+      if (formData.email_consent) {
+        await base44.integrations.Core.SendEmail({
+          to: formData.student_email,
+          subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
+          body: `שלום ${formData.student_name},
+
+פנייתך התקבלה בהצלחה!
+
+מספר פנייה: ${newTicketNumber}
+נושא: ${formData.subject}
+קטגוריה: ${categoryConfig[formData.category]?.label || formData.category}
+
+צוות הקורס יחזור אליך בהקדם האפשרי.
+
+בברכה,
+צוות קורס סטטיסטיקה`
         });
-      } catch (emailError) {
-        console.log("Staff email could not be sent");
       }
 
     } catch (error) {
