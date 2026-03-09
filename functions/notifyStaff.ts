@@ -1,14 +1,34 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
+const STAFF_EMAIL = "statisticshaifa26@gmail.com";
+
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl } = await req.json();
+    const payload = await req.json();
 
-    await base44.integrations.Core.SendEmail({
-      to: "statisticshaifa26@gmail.com",
-      subject: `פנייה חדשה ${ticketNumber} - ${categoryLabel || category}`,
-      body: `פנייה חדשה התקבלה במערכת:
+    if (payload.type === "appointment") {
+      const { studentName, studentEmail, taName, dateStr, startTime, endTime, topicLabel, notes, zoomLink } = payload;
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: STAFF_EMAIL,
+        subject: `פגישה חדשה נקבעה - ${studentName}`,
+        body: `פגישה חדשה נקבעה במערכת שעות הקבלה:
+
+סטודנט/ית: ${studentName} (${studentEmail})
+מתרגלת: ${taName}
+תאריך: ${dateStr}
+שעה: ${startTime} - ${endTime}
+נושא: ${topicLabel}
+${notes ? `הערות: ${notes}` : ''}
+${zoomLink ? `קישור זום: ${zoomLink}` : ''}`
+      });
+    } else {
+      // type === "ticket"
+      const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl } = payload;
+      await base44.asServiceRole.integrations.Core.SendEmail({
+        to: STAFF_EMAIL,
+        subject: `פנייה חדשה ${ticketNumber} - ${categoryLabel || category}`,
+        body: `פנייה חדשה התקבלה במערכת:
 
 מספר פנייה: ${ticketNumber}
 מאת: ${studentName}
@@ -26,7 +46,8 @@ ${attachmentUrl ? `קובץ מצורף: ${attachmentUrl}` : ''}
 
 ---
 ניתן לטפל בפנייה דרך מערכת הדשבורד`
-    });
+      });
+    }
 
     return Response.json({ success: true });
   } catch (error) {
