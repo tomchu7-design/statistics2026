@@ -148,11 +148,12 @@ export default function NewTicket() {
       setTicketNumber(newTicketNumber);
       setSubmitted(true);
 
-      // Email to staff - always sent
-      await base44.integrations.Core.SendEmail({
-        to: "statisticshaifa26@gmail.com",
-        subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
-        body: `פנייה חדשה התקבלה במערכת:
+      // Email to staff - always sent, independent try/catch
+      try {
+        await base44.integrations.Core.SendEmail({
+          to: "statisticshaifa26@gmail.com",
+          subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
+          body: `פנייה חדשה התקבלה במערכת:
 
 מספר פנייה: ${newTicketNumber}
 מאת: ${formData.student_name}
@@ -170,14 +171,18 @@ ${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : 
 
 ---
 ניתן לטפל בפנייה דרך מערכת הדשבורד`
-      });
+        });
+      } catch (e) {
+        console.error("Staff email failed:", e.message);
+      }
 
-      // Email to student
-      if (formData.email_consent) {
-        await base44.integrations.Core.SendEmail({
-          to: formData.student_email,
-          subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
-          body: `שלום ${formData.student_name},
+      // Email to student - independent try/catch
+      if (formData.email_consent && formData.student_email) {
+        try {
+          await base44.integrations.Core.SendEmail({
+            to: formData.student_email,
+            subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
+            body: `שלום ${formData.student_name},
 
 פנייתך התקבלה בהצלחה!
 
@@ -189,7 +194,10 @@ ${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : 
 
 בברכה,
 צוות קורס סטטיסטיקה`
-        });
+          });
+        } catch (e) {
+          console.error("Student email failed:", e.message);
+        }
       }
 
     } catch (error) {
