@@ -269,25 +269,6 @@ ${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : 
     );
   }
 
-  if (!user) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
-          <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-amber-600" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">יש להתחבר תחילה</h2>
-            <p className="text-slate-600 mb-6">כדי לפתוח פנייה, יש להתחבר למערכת</p>
-            <Button onClick={() => base44.auth.redirectToLogin()} className="bg-blue-600 hover:bg-blue-700">
-              התחברות למערכת
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-2xl mx-auto">
       <div className="text-center mb-8">
