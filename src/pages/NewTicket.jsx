@@ -151,6 +151,7 @@ export default function NewTicket() {
       // Email to staff via backend function (service role)
       try {
         await base44.functions.invoke('notifyStaff', {
+          type: "ticket",
           ticketNumber: newTicketNumber,
           studentName: formData.student_name,
           studentEmail: formData.student_email,
