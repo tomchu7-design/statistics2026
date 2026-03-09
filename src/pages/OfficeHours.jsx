@@ -183,18 +183,18 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
 צוות קורס סטטיסטיקה`
       });
 
-      // Email to staff
-      await base44.integrations.Core.SendEmail({
-        to: "statisticshaifa26@gmail.com",
-        subject: `פגישה חדשה נקבעה - ${effectiveName}`,
-        body: `פגישה חדשה נקבעה במערכת שעות הקבלה:
-
-סטודנט/ית: ${effectiveName} (${effectiveEmail})
-מתרגלת: ${selectedSlot.availability.ta_name}
-תאריך: ${dateStr}
-שעה: ${selectedSlot.start} - ${selectedSlot.end}
-נושא: ${topicLabel}
-${bookingNotes ? `הערות: ${bookingNotes}` : ''}`
+      // Email to staff via backend function
+      await base44.functions.invoke('notifyStaff', {
+        type: "appointment",
+        studentName: effectiveName,
+        studentEmail: effectiveEmail,
+        taName: selectedSlot.availability.ta_name,
+        dateStr,
+        startTime: selectedSlot.start,
+        endTime: selectedSlot.end,
+        topicLabel,
+        notes: bookingNotes,
+        zoomLink: selectedSlot.availability.zoom_link || "",
       });
 
       toast.success("הפגישה נקבעה בהצלחה!");
