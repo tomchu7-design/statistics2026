@@ -5,7 +5,7 @@ Deno.serve(async (req) => {
     const base44 = createClientFromRequest(req);
     const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl } = await req.json();
 
-    await base44.asServiceRole.integrations.Core.SendEmail({
+    await base44.integrations.Core.SendEmail({
       to: "statisticshaifa26@gmail.com",
       subject: `פנייה חדשה ${ticketNumber} - ${categoryLabel || category}`,
       body: `פנייה חדשה התקבלה במערכת:
