@@ -1,35 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  Calendar, 
-  Clock, 
-  User, 
-  MapPin,
-  CheckCircle,
-  AlertCircle,
-  Loader2,
-  X,
-  ChevronLeft,
-  ChevronRight
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  Calendar, Clock, User, MapPin, CheckCircle,
+  Loader2, X, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { categoryConfig } from "@/components/shared/CategoryBadge";
@@ -41,12 +26,14 @@ export default function OfficeHours() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedTA, setSelectedTA] = useState("all");
-  const [selectedDate, setSelectedDate] = useState(null);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingTopic, setBookingTopic] = useState("");
   const [bookingNotes, setBookingNotes] = useState("");
+  const [studentName, setStudentName] = useState(() => localStorage.getItem('studentName') || "");
+  const [studentEmail, setStudentEmail] = useState(() => localStorage.getItem('studentEmail') || "");
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
+  const [booking, setBooking] = useState(false);
 
   const queryClient = useQueryClient();
 
@@ -55,6 +42,8 @@ export default function OfficeHours() {
       try {
         const userData = await base44.auth.me();
         setUser(userData);
+        if (!studentName) setStudentName(userData.full_name || "");
+        if (!studentEmail) setStudentEmail(userData.email || "");
       } catch (e) {
         setUser(null);
       }
@@ -63,7 +52,9 @@ export default function OfficeHours() {
     loadUser();
   }, []);
 
-  // Get availability for next 2 weeks
+  const effectiveName = user?.full_name || studentName;
+  const effectiveEmail = user?.email || studentEmail;
+
   const today = new Date();
   const weekStart = startOfWeek(addDays(today, weekOffset * 7), { weekStartsOn: 0 });
   const weekEnd = addDays(weekStart, 6);
@@ -72,51 +63,39 @@ export default function OfficeHours() {
     queryKey: ["ta-availability"],
     queryFn: async () => {
       const data = await base44.entities.TAAvailability.filter({ is_active: true }, "date");
-      return data.filter(a => {
-        const availDate = parseISO(a.date);
-        return isAfter(availDate, addDays(today, -1));
-      });
+      return data.filter(a => isAfter(parseISO(a.date), addDays(today, -1)));
     },
   });
 
-  const { data: appointments = [], refetch: refetchAppointments } = useQuery({
+  const { data: appointments = [] } = useQuery({
     queryKey: ["all-appointments"],
-    queryFn: async () => {
-      const data = await base44.entities.Appointment.filter({ status: "booked" });
-      return data;
-    },
+    queryFn: async () => base44.entities.Appointment.filter({ status: "booked" }),
   });
 
   const { data: myAppointments = [] } = useQuery({
-    queryKey: ["my-appointments", user?.email],
+    queryKey: ["my-appointments", effectiveEmail],
     queryFn: async () => {
-      if (!user?.email) return [];
-      const data = await base44.entities.Appointment.filter(
-        { student_email: user.email, status: "booked" },
-        "date"
+      if (!effectiveEmail) return [];
+      return base44.entities.Appointment.filter(
+        { student_email: effectiveEmail, status: "booked" }, "date"
       );
-      return data;
     },
-    enabled: !!user?.email,
+    enabled: !!effectiveEmail,
   });
 
-  // Get unique TAs
   const tas = [...new Map(availabilities.map(a => [a.ta_email, { email: a.ta_email, name: a.ta_name }])).values()];
 
-  // Filter availabilities
   const filteredAvailabilities = availabilities.filter(a => {
     if (selectedTA !== "all" && a.ta_email !== selectedTA) return false;
     const availDate = parseISO(a.date);
     return !isBefore(availDate, weekStart) && !isAfter(availDate, weekEnd);
   });
 
-  // Generate time slots for an availability
   const generateSlots = (availability) => {
     const slots = [];
     const [startHour, startMin] = availability.start_time.split(':').map(Number);
     const [endHour, endMin] = availability.end_time.split(':').map(Number);
-    const duration = availability.slot_duration || 15;
-
+    const duration = availability.slot_duration || 20;
     let currentMinutes = startHour * 60 + startMin;
     const endMinutes = endHour * 60 + endMin;
 
@@ -124,29 +103,18 @@ export default function OfficeHours() {
       const slotStart = `${Math.floor(currentMinutes / 60).toString().padStart(2, '0')}:${(currentMinutes % 60).toString().padStart(2, '0')}`;
       const slotEndMinutes = currentMinutes + duration;
       const slotEnd = `${Math.floor(slotEndMinutes / 60).toString().padStart(2, '0')}:${(slotEndMinutes % 60).toString().padStart(2, '0')}`;
-      
-      // Check if slot is already booked
-      const isBooked = appointments.some(app => 
+
+      const isBooked = appointments.some(app =>
         app.ta_email === availability.ta_email &&
         app.date === availability.date &&
         app.start_time === slotStart
       );
-
-      // Check if slot is in the past
       const slotDateTime = new Date(`${availability.date}T${slotStart}`);
       const isPast = isBefore(slotDateTime, new Date());
 
-      slots.push({
-        start: slotStart,
-        end: slotEnd,
-        isBooked,
-        isPast,
-        availability,
-      });
-
+      slots.push({ start: slotStart, end: slotEnd, isBooked, isPast, availability });
       currentMinutes += duration;
     }
-
     return slots;
   };
 
@@ -158,9 +126,12 @@ export default function OfficeHours() {
 
   const handleBook = async () => {
     if (!selectedSlot || !bookingTopic) return;
+    if (!effectiveName.trim() || !effectiveEmail.trim()) {
+      toast.error("יש להזין שם ואימייל");
+      return;
+    }
 
-    // Check max bookings
-    const activeBookings = myAppointments.filter(a => 
+    const activeBookings = myAppointments.filter(a =>
       isAfter(parseISO(a.date), addDays(today, -1))
     ).length;
 
@@ -169,10 +140,11 @@ export default function OfficeHours() {
       return;
     }
 
+    setBooking(true);
     try {
       await base44.entities.Appointment.create({
-        student_email: user.email,
-        student_name: user.full_name,
+        student_email: effectiveEmail,
+        student_name: effectiveName,
         ta_email: selectedSlot.availability.ta_email,
         ta_name: selectedSlot.availability.ta_name,
         availability_id: selectedSlot.availability.id,
@@ -185,53 +157,45 @@ export default function OfficeHours() {
         reminder_sent: false,
       });
 
-      // Send confirmation email to student with zoom link
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: user.email,
-          subject: `אישור פגישה עם ${selectedSlot.availability.ta_name}`,
-          body: `שלום ${user.full_name},
+      // Save to localStorage for next time
+      localStorage.setItem('studentName', effectiveName);
+      localStorage.setItem('studentEmail', effectiveEmail);
+
+      const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
+      const topicLabel = categoryConfig[bookingTopic]?.label || bookingTopic;
+
+      // Email to student
+      await base44.integrations.Core.SendEmail({
+        to: effectiveEmail,
+        subject: `אישור פגישה עם ${selectedSlot.availability.ta_name} - קורס סטטיסטיקה`,
+        body: `שלום ${effectiveName},
 
 פגישתך נקבעה בהצלחה!
 
 מתרגלת: ${selectedSlot.availability.ta_name}
-תאריך: ${format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he })}
+תאריך: ${dateStr}
 שעה: ${selectedSlot.start} - ${selectedSlot.end}
-נושא: ${categoryConfig[bookingTopic]?.label || bookingTopic}
+נושא: ${topicLabel}
 ${selectedSlot.availability.zoom_link ? `קישור זום: ${selectedSlot.availability.zoom_link}` : ''}
-
-תזכורת תישלח אליך 24 שעות לפני הפגישה.
+${bookingNotes ? `הערות: ${bookingNotes}` : ''}
 
 בברכה,
 צוות קורס סטטיסטיקה`
-        });
-      } catch (e) {
-        console.log("Email could not be sent to student");
-      }
+      });
 
-      // Send notification to TA
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: selectedSlot.availability.ta_email,
-          subject: `פגישה חדשה נקבעה - ${user.full_name}`,
-          body: `שלום ${selectedSlot.availability.ta_name},
+      // Email to staff
+      await base44.integrations.Core.SendEmail({
+        to: "statisticshaifa26@gmail.com",
+        subject: `פגישה חדשה נקבעה - ${effectiveName}`,
+        body: `פגישה חדשה נקבעה במערכת שעות הקבלה:
 
-סטודנט/ית קבע/ה פגישה איתך:
-
-סטודנט/ית: ${user.full_name} (${user.email})
-תאריך: ${format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he })}
+סטודנט/ית: ${effectiveName} (${effectiveEmail})
+מתרגלת: ${selectedSlot.availability.ta_name}
+תאריך: ${dateStr}
 שעה: ${selectedSlot.start} - ${selectedSlot.end}
-נושא: ${categoryConfig[bookingTopic]?.label || bookingTopic}
-${bookingNotes ? `הערות: ${bookingNotes}` : ''}
-
-תוכלי לראות את הפגישה בדשבורד שלך.
-
-בברכה,
-מערכת שעות קבלה`
-        });
-      } catch (e) {
-        console.log("Email could not be sent to TA");
-      }
+נושא: ${topicLabel}
+${bookingNotes ? `הערות: ${bookingNotes}` : ''}`
+      });
 
       toast.success("הפגישה נקבעה בהצלחה!");
       setShowBookingDialog(false);
@@ -241,20 +205,17 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
       queryClient.invalidateQueries(["all-appointments"]);
       queryClient.invalidateQueries(["my-appointments"]);
     } catch (error) {
-      toast.error("שגיאה בקביעת הפגישה");
+      toast.error("שגיאה בקביעת הפגישה: " + error.message);
     }
+    setBooking(false);
   };
 
   const handleCancelAppointment = async (appointment) => {
-    // Check cancellation policy (12 hours before)
     const appointmentTime = new Date(`${appointment.date}T${appointment.start_time}`);
-    const minCancelTime = addHours(new Date(), 12);
-
-    if (isAfter(minCancelTime, appointmentTime)) {
+    if (isAfter(addHours(new Date(), 12), appointmentTime)) {
       toast.error("לא ניתן לבטל פגישה פחות מ-12 שעות לפני מועדה");
       return;
     }
-
     try {
       await base44.entities.Appointment.update(appointment.id, { status: "cancelled" });
       toast.success("הפגישה בוטלה");
@@ -273,25 +234,6 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
     );
   }
 
-  if (!user) {
-    return (
-      <div className="max-w-2xl mx-auto">
-        <Card className="border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50">
-          <CardContent className="py-12 text-center">
-            <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-4">
-              <AlertCircle className="w-8 h-8 text-amber-600" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">יש להתחבר תחילה</h2>
-            <p className="text-slate-600 mb-6">כדי לקבוע שעות קבלה, יש להתחבר למערכת</p>
-            <Button onClick={() => base44.auth.redirectToLogin()} className="bg-blue-600 hover:bg-blue-700">
-              התחברות למערכת
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
   return (
@@ -302,7 +244,7 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
           <Calendar className="w-8 h-8 text-emerald-600" />
         </div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">שעות קבלה</h1>
-        <p className="text-slate-600">קבעו פגישה עם אחד המתרגלים</p>
+        <p className="text-slate-600">קבעו פגישה עם אחת המתרגלות</p>
       </div>
 
       {/* My Appointments */}
@@ -317,10 +259,7 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
           <CardContent>
             <div className="space-y-3">
               {myAppointments.map((apt) => (
-                <div 
-                  key={apt.id}
-                  className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-lg border"
-                >
+                <div key={apt.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-lg border">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                       <User className="w-5 h-5 text-blue-600" />
@@ -332,9 +271,8 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
                       </p>
                     </div>
                   </div>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
+                  <Button
+                    variant="outline" size="sm"
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
                     onClick={() => handleCancelAppointment(apt)}
                   >
@@ -353,10 +291,10 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row items-center gap-4">
             <div className="flex-1 w-full sm:w-auto">
-              <Label className="text-sm text-slate-500 mb-1 block">בחירת מתרגל/ת</Label>
+              <Label className="text-sm text-slate-500 mb-1 block">בחירת מתרגלת</Label>
               <Select value={selectedTA} onValueChange={setSelectedTA}>
                 <SelectTrigger className="w-full">
-                  <SelectValue placeholder="כל המתרגלים" />
+                  <SelectValue placeholder="כל המתרגלות" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">כל המתרגלות</SelectItem>
@@ -368,23 +306,13 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
             </div>
 
             <div className="flex items-center gap-2">
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => setWeekOffset(prev => prev - 1)}
-                disabled={weekOffset <= 0}
-              >
+              <Button variant="outline" size="icon" onClick={() => setWeekOffset(prev => prev - 1)} disabled={weekOffset <= 0}>
                 <ChevronRight className="w-4 h-4" />
               </Button>
               <span className="text-sm text-slate-600 min-w-[140px] text-center">
                 {format(weekStart, "d/M", { locale: he })} - {format(weekEnd, "d/M", { locale: he })}
               </span>
-              <Button 
-                variant="outline" 
-                size="icon"
-                onClick={() => setWeekOffset(prev => prev + 1)}
-                disabled={weekOffset >= 3}
-              >
+              <Button variant="outline" size="icon" onClick={() => setWeekOffset(prev => prev + 1)} disabled={weekOffset >= 8}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
             </div>
@@ -408,12 +336,8 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {weekDays.map((day) => {
-            const dayAvailabilities = filteredAvailabilities.filter(a => 
-              isSameDay(parseISO(a.date), day)
-            );
-
+            const dayAvailabilities = filteredAvailabilities.filter(a => isSameDay(parseISO(a.date), day));
             if (dayAvailabilities.length === 0) return null;
-
             return (
               <Card key={day.toISOString()} className="border-slate-200">
                 <CardHeader className="pb-3">
@@ -467,10 +391,10 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
           <DialogHeader>
             <DialogTitle>קביעת פגישה</DialogTitle>
           </DialogHeader>
-          
+
           {selectedSlot && (
             <div className="space-y-4">
-              <div className="bg-slate-50 rounded-lg p-4 space-y-2">
+              <div className="bg-slate-50 rounded-lg p-4 space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-slate-400" />
                   <span className="font-medium">{selectedSlot.availability.ta_name}</span>
@@ -483,13 +407,30 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
                   <Clock className="w-4 h-4 text-slate-400" />
                   <span>{selectedSlot.start} - {selectedSlot.end}</span>
                 </div>
-                {selectedSlot.availability.location && (
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4 text-slate-400" />
-                    <span>{selectedSlot.availability.location}</span>
-                  </div>
-                )}
               </div>
+
+              {/* Student info fields (always shown for non-logged-in users) */}
+              {!user && (
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <Label>שם מלא *</Label>
+                    <Input
+                      value={studentName}
+                      onChange={(e) => setStudentName(e.target.value)}
+                      placeholder="שם מלא"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label>אימייל *</Label>
+                    <Input
+                      type="email"
+                      value={studentEmail}
+                      onChange={(e) => setStudentEmail(e.target.value)}
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-2">
                 <Label>נושא הפגישה *</Label>
@@ -518,15 +459,15 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
           )}
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setShowBookingDialog(false)}>
-              ביטול
-            </Button>
-            <Button 
+            <Button variant="outline" onClick={() => setShowBookingDialog(false)}>ביטול</Button>
+            <Button
               onClick={handleBook}
-              disabled={!bookingTopic}
+              disabled={!bookingTopic || booking || (!user && (!studentName.trim() || !studentEmail.trim()))}
               className="bg-emerald-600 hover:bg-emerald-700"
             >
-              <CheckCircle className="w-4 h-4 ml-2" />
+              {booking
+                ? <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                : <CheckCircle className="w-4 h-4 ml-2" />}
               אישור קביעת פגישה
             </Button>
           </DialogFooter>
