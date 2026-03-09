@@ -148,29 +148,19 @@ export default function NewTicket() {
       setTicketNumber(newTicketNumber);
       setSubmitted(true);
 
-      // Email to staff - always sent, independent try/catch
+      // Email to staff via backend function (service role)
       try {
-        await base44.integrations.Core.SendEmail({
-          to: "statisticshaifa26@gmail.com",
-          subject: `פנייה חדשה ${newTicketNumber} - ${categoryConfig[formData.category]?.label || formData.category}`,
-          body: `פנייה חדשה התקבלה במערכת:
-
-מספר פנייה: ${newTicketNumber}
-מאת: ${formData.student_name}
-אימייל: ${formData.student_email}
-${formData.student_id ? `ת.ז: ${formData.student_id}` : ''}
-
-קטגוריה: ${categoryConfig[formData.category]?.label || formData.category}
-${formData.subtopic ? `תת-נושא: ${formData.subtopic}` : ''}
-נושא: ${formData.subject}
-
-תוכן הפנייה:
-${formData.description}
-
-${formData.attachment_url ? `קובץ מצורף: ${formData.attachment_url}` : ''}
-
----
-ניתן לטפל בפנייה דרך מערכת הדשבורד`
+        await base44.functions.invoke('notifyStaff', {
+          ticketNumber: newTicketNumber,
+          studentName: formData.student_name,
+          studentEmail: formData.student_email,
+          studentId: formData.student_id,
+          category: formData.category,
+          categoryLabel: categoryConfig[formData.category]?.label || formData.category,
+          subtopic: formData.subtopic,
+          subject: formData.subject,
+          description: formData.description,
+          attachmentUrl: formData.attachment_url,
         });
       } catch (e) {
         console.error("Staff email failed:", e.message);
