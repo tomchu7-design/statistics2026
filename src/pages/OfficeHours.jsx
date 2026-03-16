@@ -349,13 +349,19 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
                 <CardContent className="space-y-4">
                   {dayAvailabilities.map((availability) => (
                     <div key={availability.id} className="space-y-2">
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
                         <User className="w-4 h-4 text-slate-400" />
                         <span className="font-medium text-sm">{availability.ta_name}</span>
                         {availability.location && (
                           <Badge variant="outline" className="text-xs">
                             <MapPin className="w-3 h-3 ml-1" />
                             {availability.location}
+                          </Badge>
+                        )}
+                        {availability.zoom_meeting_id && (
+                          <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            ID: {availability.zoom_meeting_id}
+                            {availability.zoom_password && ` | סיסמה: ${availability.zoom_password}`}
                           </Badge>
                         )}
                       </div>

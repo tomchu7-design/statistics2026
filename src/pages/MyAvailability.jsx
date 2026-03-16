@@ -47,6 +47,8 @@ export default function MyAvailability() {
     end_time: "12:00",
     slot_duration: 15,
     location: "",
+    zoom_meeting_id: "",
+    zoom_password: "",
   });
 
   const queryClient = useQueryClient();
@@ -114,6 +116,8 @@ export default function MyAvailability() {
         end_time: "12:00",
         slot_duration: 15,
         location: "",
+        zoom_meeting_id: "",
+        zoom_password: "",
       });
       refetchAvail();
       toast.success("הזמינות נוספה בהצלחה");
@@ -431,8 +435,27 @@ export default function MyAvailability() {
               <Input
                 value={newAvailability.location}
                 onChange={(e) => setNewAvailability(prev => ({ ...prev, location: e.target.value }))}
-                placeholder="חדר 123 / קישור זום"
+                placeholder="חדר 123 / זום"
               />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Meeting ID (זום)</Label>
+                <Input
+                  value={newAvailability.zoom_meeting_id}
+                  onChange={(e) => setNewAvailability(prev => ({ ...prev, zoom_meeting_id: e.target.value }))}
+                  placeholder="123 456 7890"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>סיסמה (זום)</Label>
+                <Input
+                  value={newAvailability.zoom_password}
+                  onChange={(e) => setNewAvailability(prev => ({ ...prev, zoom_password: e.target.value }))}
+                  placeholder="123456"
+                />
+              </div>
             </div>
           </div>
 
