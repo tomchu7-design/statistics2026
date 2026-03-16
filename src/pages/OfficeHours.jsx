@@ -141,8 +141,9 @@ export default function OfficeHours() {
     }
 
     setBooking(true);
+    setShowBookingDialog(false);
     try {
-      await base44.entities.Appointment.create({
+    await base44.entities.Appointment.create({
         student_email: effectiveEmail,
         student_name: effectiveName,
         ta_email: selectedSlot.availability.ta_email,
@@ -165,16 +166,14 @@ export default function OfficeHours() {
       const topicLabel = categoryConfig[bookingTopic]?.label || bookingTopic;
 
       const zoomDetails = selectedSlot.availability.zoom_meeting_id
-        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}${selectedSlot.availability.zoom_password ? `\nסיסמה: ${selectedSlot.availability.zoom_password}` : ''}`
-        : "";
+        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
+        : "לא הוזנו פרטי זום";
 
       // Email to student
       await base44.integrations.Core.SendEmail({
         to: effectiveEmail,
         subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
-        body: `שלום, נקבעה שעת קבלה למתרגלת ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה. הפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}. ההתחברות לשעת קבלה היא בזום. פרטי ההתחברות לפגישה: ${zoomDetails}
-
-תודה, סגל הקורס`
+        body: `שלום, נקבעה שעת קבלה למתרגלת ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
       });
 
       // Email to TA via backend function
@@ -193,7 +192,6 @@ export default function OfficeHours() {
       });
 
       toast.success("הפגישה נקבעה בהצלחה!");
-      setShowBookingDialog(false);
       setSelectedSlot(null);
       setBookingTopic("");
       setBookingNotes("");
