@@ -274,13 +274,8 @@ export default function Layout({ children }) {
       {/* Footer */}
       <footer className="border-t bg-white/50 mt-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-500">
-            <p>© 2024 קורס סטטיסטיקה - מערכת תמיכה</p>
-            <div className="flex items-center gap-4">
-              <Link to={createPageUrl("QnAPage")} className="hover:text-blue-600 transition">שאלות נפוצות</Link>
-              <span>•</span>
-              <a href="mailto:stats@university.ac.il" className="hover:text-blue-600 transition">צור קשר</a>
-            </div>
+          <div className="flex items-center justify-center text-sm text-slate-500">
+            <p>© 2026 קורס סטטיסטיקה - מערכת תמיכה</p>
           </div>
         </div>
       </footer>
