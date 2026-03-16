@@ -170,30 +170,26 @@ export default function OfficeHours() {
       queryClient.invalidateQueries({ queryKey: ["all-appointments"] });
       queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
 
-      // Send confirmation emails - same pattern as NewTicket (frontend with user token)
+      // Send confirmation emails via backend function (same as NewTicket)
       const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
       const zoomDetails = selectedSlot.availability.zoom_meeting_id
         ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
         : "לא הוזנו פרטי זום";
 
       try {
-        await base44.integrations.Core.SendEmail({
-          to: effectiveEmail,
-          subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
-          body: `שלום,\n\nנקבעה שעת קבלה עם ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
+        await base44.functions.invoke('notifyStaff', {
+          type: "appointment",
+          studentName: effectiveName,
+          studentEmail: effectiveEmail,
+          taName: selectedSlot.availability.ta_name,
+          taEmail: selectedSlot.availability.ta_email,
+          dateStr,
+          startTime: selectedSlot.start,
+          endTime: selectedSlot.end,
+          zoomDetails
         });
       } catch (emailError) {
-        toast.error("שגיאה בשליחת אישור למייל הסטודנט: " + emailError.message);
-      }
-
-      try {
-        await base44.integrations.Core.SendEmail({
-          to: selectedSlot.availability.ta_email,
-          subject: `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`,
-          body: `שלום ${selectedSlot.availability.ta_name},\n\nנקבעה שעת קבלה ע"י הסטודנט ${effectiveName} (${effectiveEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
-        });
-      } catch (emailError) {
-        toast.error("שגיאה בשליחת אישור למייל המתרגלת: " + emailError.message);
+        toast.error("שגיאה בשליחת אישורים במייל: " + emailError.message);
       }
     } catch (error) {
       toast.error("שגיאה בקביעת הפגישה: " + error.message);
