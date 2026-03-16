@@ -24,16 +24,59 @@ Deno.serve(async (req) => {
       ]);
     } else {
       // type === "ticket"
-      const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa } = payload;
-      await base44.integrations.Core.SendEmail({
-        to: STAFF_EMAIL,
-        subject: `נפתחה פנייה חדשה באפליקציה מספר ${ticketNumber}`,
-        body: `נושא הפנייה: ${subject}
-מתרגלת: ${assignedTa || 'לא צוין'}
-תוכן הפנייה: ${description}
-שם הסטודנט: ${studentName}
-מייל למענה: ${studentEmail}`
-      });
+      const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa, emailConsent } = payload;
+
+      const staffBody = [
+        `מספר פנייה: ${ticketNumber}`,
+        `שם הסטודנט: ${studentName}`,
+        `מייל למענה: ${studentEmail}`,
+        studentId ? `תעודת זהות: ${studentId}` : null,
+        `קטגוריה: ${categoryLabel || category}`,
+        subtopic ? `תת-נושא: ${subtopic}` : null,
+        assignedTa ? `מתרגלת: ${assignedTa}` : `מתרגלת: לא צוין`,
+        ``,
+        `נושא הפנייה: ${subject}`,
+        ``,
+        `תוכן הפנייה:`,
+        description,
+        attachmentUrl ? `\nקובץ מצורף: ${attachmentUrl}` : null,
+      ].filter(line => line !== null).join('\n');
+
+      const studentBody = [
+        `שלום ${studentName},`,
+        ``,
+        `פנייתך לסגל קורס סטטיסטיקה התקבלה ותיענה בהקדם.`,
+        ``,
+        `מספר פנייה: ${ticketNumber}`,
+        `נושא: ${subject}`,
+        `קטגוריה: ${categoryLabel || category}`,
+        assignedTa ? `מתרגלת: ${assignedTa}` : null,
+        ``,
+        `אנא שמרי את מספר הפנייה לצורך מעקב.`,
+        `מענה לפנייתך יישלח ישירות למייל זה.`,
+        ``,
+        `תודה, סגל הקורס`,
+      ].filter(line => line !== null).join('\n');
+
+      const emailTasks = [
+        base44.asServiceRole.integrations.Core.SendEmail({
+          to: STAFF_EMAIL,
+          subject: `פנייה חדשה #${ticketNumber} - ${subject}`,
+          body: staffBody,
+        })
+      ];
+
+      if (emailConsent && studentEmail) {
+        emailTasks.push(
+          base44.asServiceRole.integrations.Core.SendEmail({
+            to: studentEmail,
+            subject: `פנייתך התקבלה - מספר ${ticketNumber}`,
+            body: studentBody,
+          })
+        );
+      }
+
+      await Promise.all(emailTasks);
     }
 
     return Response.json({ success: true });
