@@ -173,19 +173,12 @@ export default function NewTicket() {
         try {
           await base44.integrations.Core.SendEmail({
             to: formData.student_email,
-            subject: `פנייה ${newTicketNumber} התקבלה - קורס סטטיסטיקה`,
-            body: `שלום ${formData.student_name},
+            subject: `פתיחת פנייה - קורס סטטיסטיקה`,
+            body: `שלום רב,
 
-פנייתך התקבלה בהצלחה!
+פנייתך לסגל קורס סטטיסטיקה התקבלה ותיענה בהקדם. מספר הפנייה: ${newTicketNumber}. אנא שים לב כי מענה לפנייתך יתקבל ישירות למייל זה.
 
-מספר פנייה: ${newTicketNumber}
-נושא: ${formData.subject}
-קטגוריה: ${categoryConfig[formData.category]?.label || formData.category}
-
-צוות הקורס יחזור אליך בהקדם האפשרי.
-
-בברכה,
-צוות קורס סטטיסטיקה`
+תודה, סגל הקורס`
           });
         } catch (e) {
           console.error("Student email failed:", e.message);

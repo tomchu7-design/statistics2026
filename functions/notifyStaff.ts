@@ -24,28 +24,15 @@ ${zoomLink ? `קישור זום: ${zoomLink}` : ''}`
       });
     } else {
       // type === "ticket"
-      const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl } = payload;
+      const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa } = payload;
       await base44.asServiceRole.integrations.Core.SendEmail({
         to: STAFF_EMAIL,
-        subject: `פנייה חדשה ${ticketNumber} - ${categoryLabel || category}`,
-        body: `פנייה חדשה התקבלה במערכת:
-
-מספר פנייה: ${ticketNumber}
-מאת: ${studentName}
-אימייל: ${studentEmail}
-${studentId ? `ת.ז: ${studentId}` : ''}
-
-קטגוריה: ${categoryLabel || category}
-${subtopic ? `תת-נושא: ${subtopic}` : ''}
-נושא: ${subject}
-
-תוכן הפנייה:
-${description}
-
-${attachmentUrl ? `קובץ מצורף: ${attachmentUrl}` : ''}
-
----
-ניתן לטפל בפנייה דרך מערכת הדשבורד`
+        subject: `נפתחה פנייה חדשה באפליקציה מספר ${ticketNumber}`,
+        body: `נושא הפנייה: ${subject}
+מתרגלת: ${assignedTa || 'לא צוין'}
+תוכן הפנייה: ${description}
+שם הסטודנט: ${studentName}
+מייל למענה: ${studentEmail}`
       });
     }
 
