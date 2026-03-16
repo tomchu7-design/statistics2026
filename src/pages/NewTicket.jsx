@@ -319,6 +319,24 @@ export default function NewTicket() {
               <h3 className="font-semibold text-slate-900 border-b pb-2">פרטי הפנייה</h3>
               
               <div className="space-y-2">
+                <Label>מתרגלת</Label>
+                <Select
+                  value={formData.assigned_ta}
+                  onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_ta: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="בחרו מתרגלת (אופציונלי)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="תום">תום</SelectItem>
+                    <SelectItem value="יהל">יהל</SelectItem>
+                    <SelectItem value="ג׳יהאן">ג׳יהאן</SelectItem>
+                    <SelectItem value="דניאל">דניאל</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
                 <Label>קטגוריה *</Label>
                 <Select
                   value={formData.category}
