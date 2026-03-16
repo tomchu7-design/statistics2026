@@ -52,6 +52,7 @@ export default function NewTicket() {
     student_email: "",
     student_id: "",
     category: "",
+    assigned_ta: "",
     subtopic: "",
     subject: initialSubject,
     description: "",
