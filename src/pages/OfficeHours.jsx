@@ -164,37 +164,32 @@ export default function OfficeHours() {
       const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
       const topicLabel = categoryConfig[bookingTopic]?.label || bookingTopic;
 
+      const zoomDetails = selectedSlot.availability.zoom_meeting_id
+        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}${selectedSlot.availability.zoom_password ? `\nסיסמה: ${selectedSlot.availability.zoom_password}` : ''}`
+        : "";
+
       // Email to student
       await base44.integrations.Core.SendEmail({
         to: effectiveEmail,
-        subject: `אישור פגישה עם ${selectedSlot.availability.ta_name} - קורס סטטיסטיקה`,
-        body: `שלום ${effectiveName},
+        subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
+        body: `שלום, נקבעה שעת קבלה למתרגלת ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה. הפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}. ההתחברות לשעת קבלה היא בזום. פרטי ההתחברות לפגישה: ${zoomDetails}
 
-פגישתך נקבעה בהצלחה!
-
-מתרגלת: ${selectedSlot.availability.ta_name}
-תאריך: ${dateStr}
-שעה: ${selectedSlot.start} - ${selectedSlot.end}
-נושא: ${topicLabel}
-${selectedSlot.availability.zoom_link ? `קישור זום: ${selectedSlot.availability.zoom_link}` : ''}
-${bookingNotes ? `הערות: ${bookingNotes}` : ''}
-
-בברכה,
-צוות קורס סטטיסטיקה`
+תודה, סגל הקורס`
       });
 
-      // Email to staff via backend function
+      // Email to TA via backend function
       await base44.functions.invoke('notifyStaff', {
         type: "appointment",
         studentName: effectiveName,
         studentEmail: effectiveEmail,
         taName: selectedSlot.availability.ta_name,
+        taEmail: selectedSlot.availability.ta_email,
         dateStr,
         startTime: selectedSlot.start,
         endTime: selectedSlot.end,
         topicLabel,
         notes: bookingNotes,
-        zoomLink: selectedSlot.availability.zoom_link || "",
+        zoomDetails,
       });
 
       toast.success("הפגישה נקבעה בהצלחה!");

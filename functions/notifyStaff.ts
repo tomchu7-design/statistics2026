@@ -8,19 +8,13 @@ Deno.serve(async (req) => {
     const payload = await req.json();
 
     if (payload.type === "appointment") {
-      const { studentName, studentEmail, taName, dateStr, startTime, endTime, topicLabel, notes, zoomLink } = payload;
+      const { studentName, studentEmail, taName, taEmail, dateStr, startTime, endTime, zoomDetails } = payload;
       await base44.asServiceRole.integrations.Core.SendEmail({
-        to: STAFF_EMAIL,
-        subject: `פגישה חדשה נקבעה - ${studentName}`,
-        body: `פגישה חדשה נקבעה במערכת שעות הקבלה:
+        to: taEmail,
+        subject: `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`,
+        body: `שלום, נקבעה שעת קבלה ע"י הסטודנט ${studentName}. הפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}. פרטי ההתחברות לפגישה: ${zoomDetails}
 
-סטודנט/ית: ${studentName} (${studentEmail})
-מתרגלת: ${taName}
-תאריך: ${dateStr}
-שעה: ${startTime} - ${endTime}
-נושא: ${topicLabel}
-${notes ? `הערות: ${notes}` : ''}
-${zoomLink ? `קישור זום: ${zoomLink}` : ''}`
+בהצלחה!`
       });
     } else {
       // type === "ticket"
