@@ -436,7 +436,7 @@ export default function OfficeHours() {
                     <SelectValue placeholder="בחרו נושא" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(categoryConfig).filter(([k]) => k !== "general").map(([key, config]) => (
+                    {Object.entries(categoryConfig).filter(([k]) => k !== "general" && k !== "quiz" && k !== "excel").map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
                   </SelectContent>
