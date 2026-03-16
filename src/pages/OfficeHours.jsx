@@ -169,14 +169,7 @@ export default function OfficeHours() {
         ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
         : "לא הוזנו פרטי זום";
 
-      // Email to student
-      await base44.integrations.Core.SendEmail({
-        to: effectiveEmail,
-        subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
-        body: `שלום, נקבעה שעת קבלה למתרגלת ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
-      });
-
-      // Email to TA via backend function
+      // Send both emails via backend function
       await base44.functions.invoke('notifyStaff', {
         type: "appointment",
         studentName: effectiveName,
@@ -195,8 +188,8 @@ export default function OfficeHours() {
       setSelectedSlot(null);
       setBookingTopic("");
       setBookingNotes("");
-      queryClient.invalidateQueries(["all-appointments"]);
-      queryClient.invalidateQueries(["my-appointments"]);
+      queryClient.invalidateQueries({ queryKey: ["all-appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
     } catch (error) {
       toast.error("שגיאה בקביעת הפגישה: " + error.message);
     }
@@ -212,8 +205,8 @@ export default function OfficeHours() {
     try {
       await base44.entities.Appointment.update(appointment.id, { status: "cancelled" });
       toast.success("הפגישה בוטלה");
-      queryClient.invalidateQueries(["all-appointments"]);
-      queryClient.invalidateQueries(["my-appointments"]);
+      queryClient.invalidateQueries({ queryKey: ["all-appointments"] });
+      queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
     } catch (error) {
       toast.error("שגיאה בביטול הפגישה");
     }
