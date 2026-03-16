@@ -163,6 +163,7 @@ export default function NewTicket() {
           subject: formData.subject,
           description: formData.description,
           attachmentUrl: formData.attachment_url,
+          assignedTa: formData.assigned_ta,
         });
       } catch (e) {
         console.error("Staff email failed:", e.message);
