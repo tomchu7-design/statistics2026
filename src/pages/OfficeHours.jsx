@@ -170,7 +170,7 @@ export default function OfficeHours() {
       queryClient.invalidateQueries({ queryKey: ["all-appointments"] });
       queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
 
-      // Send emails directly from frontend (same pattern as NewTicket)
+      // Send confirmation emails - same pattern as NewTicket (frontend with user token)
       const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
       const zoomDetails = selectedSlot.availability.zoom_meeting_id
         ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
@@ -183,7 +183,7 @@ export default function OfficeHours() {
           body: `שלום,\n\nנקבעה שעת קבלה עם ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
         });
       } catch (emailError) {
-        console.warn("Student email failed:", emailError.message);
+        toast.error("שגיאה בשליחת אישור למייל הסטודנט: " + emailError.message);
       }
 
       try {
@@ -193,7 +193,7 @@ export default function OfficeHours() {
           body: `שלום ${selectedSlot.availability.ta_name},\n\nנקבעה שעת קבלה ע"י הסטודנט ${effectiveName} (${effectiveEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
         });
       } catch (emailError) {
-        console.warn("TA email failed:", emailError.message);
+        toast.error("שגיאה בשליחת אישור למייל המתרגלת: " + emailError.message);
       }
     } catch (error) {
       toast.error("שגיאה בקביעת הפגישה: " + error.message);
