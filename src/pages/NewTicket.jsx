@@ -164,26 +164,10 @@ export default function NewTicket() {
           description: formData.description,
           attachmentUrl: formData.attachment_url,
           assignedTa: formData.assigned_ta,
+          emailConsent: formData.email_consent,
         });
       } catch (e) {
         console.error("Staff email failed:", e.message);
-      }
-
-      // Email to student - independent try/catch
-      if (formData.email_consent && formData.student_email) {
-        try {
-          await base44.integrations.Core.SendEmail({
-            to: formData.student_email,
-            subject: `פתיחת פנייה - קורס סטטיסטיקה`,
-            body: `שלום רב,
-
-פנייתך לסגל קורס סטטיסטיקה התקבלה ותיענה בהקדם. מספר הפנייה: ${newTicketNumber}. אנא שים לב כי מענה לפנייתך יתקבל ישירות למייל זה.
-
-תודה, סגל הקורס`
-          });
-        } catch (e) {
-          console.error("Student email failed:", e.message);
-        }
       }
 
     } catch (error) {
