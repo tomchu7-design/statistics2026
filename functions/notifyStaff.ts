@@ -10,19 +10,18 @@ Deno.serve(async (req) => {
     if (payload.type === "appointment") {
       const { studentName, studentEmail, taName, taEmail, dateStr, startTime, endTime, zoomDetails } = payload;
 
-      // Email to student (user-scoped to allow external emails)
-      await base44.integrations.Core.SendEmail({
-        to: studentEmail,
-        subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
-        body: `שלום,\n\nנקבעה שעת קבלה עם ${taName} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
-      });
-
-      // Email to TA (user-scoped to allow external emails)
-      await base44.integrations.Core.SendEmail({
-        to: taEmail,
-        subject: `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`,
-        body: `שלום ${taName},\n\nנקבעה שעת קבלה ע"י הסטודנט ${studentName} (${studentEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
-      });
+      await Promise.all([
+        base44.integrations.Core.SendEmail({
+          to: studentEmail,
+          subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
+          body: `שלום,\n\nנקבעה שעת קבלה עם ${taName} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
+        }),
+        base44.integrations.Core.SendEmail({
+          to: taEmail,
+          subject: `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`,
+          body: `שלום ${taName},\n\nנקבעה שעת קבלה ע"י הסטודנט ${studentName} (${studentEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
+        })
+      ]);
     } else {
       // type === "ticket"
       const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa } = payload;
