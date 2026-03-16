@@ -162,34 +162,36 @@ export default function OfficeHours() {
       localStorage.setItem('studentName', effectiveName);
       localStorage.setItem('studentEmail', effectiveEmail);
 
-      const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
-      const topicLabel = categoryConfig[bookingTopic]?.label || bookingTopic;
-
-      const zoomDetails = selectedSlot.availability.zoom_meeting_id
-        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
-        : "לא הוזנו פרטי זום";
-
-      // Send both emails via backend function
-      await base44.functions.invoke('notifyStaff', {
-        type: "appointment",
-        studentName: effectiveName,
-        studentEmail: effectiveEmail,
-        taName: selectedSlot.availability.ta_name,
-        taEmail: selectedSlot.availability.ta_email,
-        dateStr,
-        startTime: selectedSlot.start,
-        endTime: selectedSlot.end,
-        topicLabel,
-        notes: bookingNotes,
-        zoomDetails,
-      });
-
+      // Immediately update UI
       toast.success("הפגישה נקבעה בהצלחה!");
       setSelectedSlot(null);
       setBookingTopic("");
       setBookingNotes("");
       queryClient.invalidateQueries({ queryKey: ["all-appointments"] });
       queryClient.invalidateQueries({ queryKey: ["my-appointments"] });
+
+      // Send emails (non-blocking)
+      const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
+      const zoomDetails = selectedSlot.availability.zoom_meeting_id
+        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
+        : "לא הוזנו פרטי זום";
+
+      try {
+        await Promise.all([
+          base44.integrations.Core.SendEmail({
+            to: effectiveEmail,
+            subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
+            body: `שלום,\n\nנקבעה שעת קבלה עם ${selectedSlot.availability.ta_name} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
+          }),
+          base44.integrations.Core.SendEmail({
+            to: selectedSlot.availability.ta_email,
+            subject: `נקבעה שעת קבלה חדשה`,
+            body: `שלום ${selectedSlot.availability.ta_name},\n\nנקבעה שעת קבלה ע"י הסטודנט ${effectiveName} (${effectiveEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${selectedSlot.start}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
+          }),
+        ]);
+      } catch (emailError) {
+        console.warn("Email sending failed:", emailError.message);
+      }
     } catch (error) {
       toast.error("שגיאה בקביעת הפגישה: " + error.message);
     }
