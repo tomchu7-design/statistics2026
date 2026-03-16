@@ -11,12 +11,12 @@ Deno.serve(async (req) => {
       const { studentName, studentEmail, taName, taEmail, dateStr, startTime, endTime, zoomDetails } = payload;
 
       await Promise.all([
-        base44.integrations.Core.SendEmail({
+        base44.asServiceRole.integrations.Core.SendEmail({
           to: studentEmail,
           subject: `נקבעה שעת קבלה לקורס סטטיסטיקה`,
           body: `שלום,\n\nנקבעה שעת קבלה עם ${taName} בקורס סטטיסטיקה.\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nההתחברות לשעת קבלה היא בזום.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nתודה, סגל הקורס`
         }),
-        base44.integrations.Core.SendEmail({
+        base44.asServiceRole.integrations.Core.SendEmail({
           to: taEmail,
           subject: `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`,
           body: `שלום ${taName},\n\nנקבעה שעת קבלה ע"י הסטודנט ${studentName} (${studentEmail}).\nהפגישה נקבעה לתאריך ${dateStr} בשעה ${startTime}.\nפרטי ההתחברות לפגישה:\n${zoomDetails}\n\nבהצלחה!`
