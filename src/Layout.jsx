@@ -50,7 +50,7 @@ export default function Layout({ children }) {
 
   const studentLinks = [
     { name: "בית", href: createPageUrl("Home"), icon: Home },
-    { name: "שאלות ותשובות", href: createPageUrl("QnAPage"), icon: HelpCircle },
+
     { name: "פתיחת פנייה", href: createPageUrl("NewTicket"), icon: MessageSquarePlus },
     { name: "שעות קבלה", href: createPageUrl("OfficeHours"), icon: Calendar },
     { name: "הפניות שלי", href: createPageUrl("MyTickets"), icon: FileText },

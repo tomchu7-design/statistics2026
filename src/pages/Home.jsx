@@ -13,8 +13,8 @@ export default function Home() {
         </div>
 
         <div className="grid sm:grid-cols-2 gap-5">
-          <Link to={createPageUrl("OfficeHours")}>
-            <div className="group bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg">
+          <Link to={createPageUrl("OfficeHours")} className="block h-full">
+            <div className="group bg-emerald-50 border-2 border-emerald-200 hover:bg-emerald-100 hover:border-emerald-400 rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg h-full flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-2xl bg-emerald-500 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-emerald-200">
                 <Calendar className="w-8 h-8 text-white" />
               </div>
@@ -23,8 +23,8 @@ export default function Home() {
             </div>
           </Link>
 
-          <Link to={createPageUrl("NewTicket")}>
-            <div className="group bg-blue-50 border-2 border-blue-200 hover:bg-blue-100 hover:border-blue-400 rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg">
+          <Link to={createPageUrl("NewTicket")} className="block h-full">
+            <div className="group bg-blue-50 border-2 border-blue-200 hover:bg-blue-100 hover:border-blue-400 rounded-2xl p-8 text-center transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg h-full flex flex-col items-center justify-center">
               <div className="w-16 h-16 rounded-2xl bg-blue-500 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-blue-200">
                 <MessageSquarePlus className="w-8 h-8 text-white" />
               </div>
