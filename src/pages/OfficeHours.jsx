@@ -312,7 +312,7 @@ ${bookingNotes ? `הערות: ${bookingNotes}` : ''}
               <span className="text-sm text-slate-600 min-w-[140px] text-center">
                 {format(weekStart, "d/M", { locale: he })} - {format(weekEnd, "d/M", { locale: he })}
               </span>
-              <Button variant="outline" size="icon" onClick={() => setWeekOffset(prev => prev + 1)} disabled={weekOffset >= 8}>
+              <Button variant="outline" size="icon" onClick={() => setWeekOffset(prev => prev + 1)} disabled={weekOffset >= 20}>
                 <ChevronLeft className="w-4 h-4" />
               </Button>
             </div>
