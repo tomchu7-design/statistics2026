@@ -28,6 +28,7 @@ Deno.serve(async (req) => {
       const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa } = payload;
       await base44.integrations.Core.SendEmail({
         to: STAFF_EMAIL,
+
         subject: `נפתחה פנייה חדשה באפליקציה מספר ${ticketNumber}`,
         body: `נושא הפנייה: ${subject}
 מתרגלת: ${assignedTa || 'לא צוין'}
