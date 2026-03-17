@@ -173,7 +173,7 @@ export default function OfficeHours() {
       // Send confirmation emails via backend function (same as NewTicket)
       const dateStr = format(parseISO(selectedSlot.availability.date), "EEEE, d בMMMM yyyy", { locale: he });
       const zoomDetails = selectedSlot.availability.zoom_meeting_id
-        ? `מזהה פגישה: ${selectedSlot.availability.zoom_meeting_id}\nסיסמה: ${selectedSlot.availability.zoom_password || 'אין'}`
+        ? `Meeting ID: ${selectedSlot.availability.zoom_meeting_id}\nPassword: ${selectedSlot.availability.zoom_password || 'none'}`
         : "לא הוזנו פרטי זום";
 
       try {
