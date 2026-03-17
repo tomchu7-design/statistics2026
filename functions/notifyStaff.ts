@@ -2,7 +2,9 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const STAFF_EMAIL = "statisticshaifa26@gmail.com";
 
-const NL = '\r\n';
+function toHtml(lines) {
+  return lines.filter(line => line !== null && line !== undefined).join('<br>');
+}
 
 async function sendEmail(base44, to, subject, body) {
   try {
@@ -21,7 +23,7 @@ Deno.serve(async (req) => {
     if (payload.type === "appointment") {
       const { studentName, studentEmail, taName, taEmail, dateStr, startTime, endTime, zoomDetails } = payload;
 
-      const studentBody = [
+      const studentBody = toHtml([
         `שלום ${studentName},`,
         ``,
         `נקבעה שעת קבלה עם ${taName} בקורס סטטיסטיקה.`,
@@ -31,12 +33,12 @@ Deno.serve(async (req) => {
         ``,
         `ההתחברות לשעת קבלה היא בזום.`,
         `פרטי ההתחברות לפגישה:`,
-        zoomDetails,
+        ...(zoomDetails || '').split('\n'),
         ``,
         `תודה, סגל הקורס`,
-      ].join(NL);
+      ]);
 
-      const taBody = [
+      const taBody = toHtml([
         `שלום ${taName},`,
         ``,
         `נקבעה שעת קבלה חדשה על ידי סטודנט.`,
@@ -47,10 +49,10 @@ Deno.serve(async (req) => {
         `שעה: ${startTime} - ${endTime}`,
         ``,
         `פרטי ההתחברות לפגישה:`,
-        zoomDetails,
+        ...(zoomDetails || '').split('\n'),
         ``,
         `בהצלחה!`,
-      ].join(NL);
+      ]);
 
       await sendEmail(base44, studentEmail, `נקבעה שעת קבלה לקורס סטטיסטיקה`, studentBody);
       await sendEmail(base44, taEmail, `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`, taBody);
@@ -59,7 +61,7 @@ Deno.serve(async (req) => {
       // type === "ticket"
       const { ticketNumber, studentName, studentEmail, studentId, category, categoryLabel, subtopic, subject, description, attachmentUrl, assignedTa, emailConsent } = payload;
 
-      const staffBody = [
+      const staffBody = toHtml([
         `מספר פנייה: ${ticketNumber}`,
         ``,
         `שם הסטודנט: ${studentName}`,
@@ -73,12 +75,12 @@ Deno.serve(async (req) => {
         ``,
         `תוכן הפנייה:`,
         `---`,
-        description,
+        ...(description || '').split('\n'),
         `---`,
         attachmentUrl ? `קובץ מצורף: ${attachmentUrl}` : null,
-      ].filter(line => line !== null).join(NL);
+      ]);
 
-      const studentBody = [
+      const studentBody = toHtml([
         `שלום ${studentName},`,
         ``,
         `פנייתך לסגל קורס סטטיסטיקה התקבלה ותיענה בהקדם.`,
@@ -92,7 +94,7 @@ Deno.serve(async (req) => {
         `מענה לפנייתך יישלח ישירות למייל זה.`,
         ``,
         `תודה, סגל הקורס`,
-      ].filter(line => line !== null).join(NL);
+      ]);
 
       await sendEmail(base44, STAFF_EMAIL, `פנייה חדשה #${ticketNumber} - ${subject}`, staffBody);
 
