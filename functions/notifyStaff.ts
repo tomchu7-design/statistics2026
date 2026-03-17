@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
         description,
         `---`,
         attachmentUrl ? `קובץ מצורף: ${attachmentUrl}` : null,
-      ].filter(line => line !== null).join('\n');
+      ].filter(line => line !== null).join(NL);
 
       const studentBody = [
         `שלום ${studentName},`,
@@ -92,7 +92,7 @@ Deno.serve(async (req) => {
         `מענה לפנייתך יישלח ישירות למייל זה.`,
         ``,
         `תודה, סגל הקורס`,
-      ].filter(line => line !== null).join('\n');
+      ].filter(line => line !== null).join(NL);
 
       await sendEmail(base44, STAFF_EMAIL, `פנייה חדשה #${ticketNumber} - ${subject}`, staffBody);
 

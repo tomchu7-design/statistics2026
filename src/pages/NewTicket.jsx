@@ -112,6 +112,7 @@ export default function NewTicket() {
     const newErrors = {};
     if (!formData.student_name.trim()) newErrors.student_name = "שדה חובה";
     if (!formData.student_email.trim()) newErrors.student_email = "שדה חובה";
+    if (!formData.assigned_ta) newErrors.assigned_ta = "יש לבחור מתרגלת";
     if (!formData.category) newErrors.category = "יש לבחור קטגוריה";
     if (!formData.subject.trim()) newErrors.subject = "שדה חובה";
     if (!formData.description.trim()) newErrors.description = "שדה חובה";
