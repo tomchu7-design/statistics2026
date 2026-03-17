@@ -2,6 +2,8 @@ import { createClientFromRequest } from 'npm:@base44/sdk@0.8.20';
 
 const STAFF_EMAIL = "statisticshaifa26@gmail.com";
 
+const NL = '\r\n';
+
 async function sendEmail(base44, to, subject, body) {
   try {
     await base44.asServiceRole.integrations.Core.SendEmail({ to, subject, body });

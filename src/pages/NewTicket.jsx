@@ -297,13 +297,13 @@ export default function NewTicket() {
               <h3 className="font-semibold text-slate-900 border-b pb-2">פרטי הפנייה</h3>
               
               <div className="space-y-2">
-                <Label>מתרגלת</Label>
+                <Label>מתרגלת *</Label>
                 <Select
                   value={formData.assigned_ta}
                   onValueChange={(value) => setFormData(prev => ({ ...prev, assigned_ta: value }))}
                 >
-                  <SelectTrigger>
-                    <SelectValue placeholder="בחרו מתרגלת (אופציונלי)" />
+                  <SelectTrigger className={errors.assigned_ta ? "border-red-300" : ""}>
+                    <SelectValue placeholder="בחרו מתרגלת" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="תום">תום</SelectItem>
@@ -324,7 +324,7 @@ export default function NewTicket() {
                     <SelectValue placeholder="בחרו קטגוריה" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(categoryConfig).filter(([k]) => k !== "general").map(([key, config]) => (
+                    {Object.entries(categoryConfig).filter(([k]) => !["general", "quiz", "excel"].includes(k)).map(([key, config]) => (
                       <SelectItem key={key} value={key}>{config.label}</SelectItem>
                     ))}
                   </SelectContent>
