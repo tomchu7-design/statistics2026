@@ -3,19 +3,11 @@ import { base44 } from "@/api/base44Client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { 
   Settings, 
-  Users, 
-  HelpCircle,
-  Plus,
-  Trash2,
-  Edit,
   AlertCircle,
   Loader2,
-  Save,
   Download,
   BookOpen,
   UserPlus,
-  X,
-  CheckCircle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,7 +43,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Switch } from "@/components/ui/switch";
 import { categoryConfig } from "@/components/shared/CategoryBadge";
 import { toast } from "sonner";
 import { format } from "date-fns";
@@ -59,20 +50,7 @@ import { format } from "date-fns";
 export default function AdminSettings() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("qna");
-  
-  // QnA Dialog
-  const [showQnADialog, setShowQnADialog] = useState(false);
-  const [editingQnA, setEditingQnA] = useState(null);
-  const [qnaForm, setQnaForm] = useState({
-    question: "",
-    answer: "",
-    category: "general",
-    tags: [],
-    attachment_url: "",
-    is_published: true,
-  });
-  const [newTag, setNewTag] = useState("");
+  const [activeTab, setActiveTab] = useState("users");
 
   // Invite Dialog
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -96,12 +74,6 @@ export default function AdminSettings() {
 
   const isAdmin = user?.role === "admin" || user?.staff_role === "admin";
 
-  const { data: qnas = [], refetch: refetchQnA } = useQuery({
-    queryKey: ["admin-qna"],
-    queryFn: () => base44.entities.QnA.list("-created_date"),
-    enabled: isAdmin,
-  });
-
   const { data: users = [], refetch: refetchUsers } = useQuery({
     queryKey: ["admin-users"],
     queryFn: () => base44.entities.User.list(),
@@ -121,74 +93,6 @@ export default function AdminSettings() {
   });
 
   const staffUsers = users.filter(u => u.role === "admin" || u.staff_role === "ta" || u.staff_role === "admin");
-
-  // Q&A CRUD
-  const handleSaveQnA = async () => {
-    if (!qnaForm.question || !qnaForm.answer) {
-      toast.error("יש למלא שאלה ותשובה");
-      return;
-    }
-
-    try {
-      if (editingQnA) {
-        await base44.entities.QnA.update(editingQnA.id, qnaForm);
-        toast.success("השאלה עודכנה");
-      } else {
-        await base44.entities.QnA.create({ ...qnaForm, view_count: 0 });
-        toast.success("השאלה נוספה");
-      }
-
-      setShowQnADialog(false);
-      setEditingQnA(null);
-      setQnaForm({
-        question: "",
-        answer: "",
-        category: "general",
-        tags: [],
-        attachment_url: "",
-        is_published: true,
-      });
-      refetchQnA();
-    } catch (error) {
-      toast.error("שגיאה בשמירה");
-    }
-  };
-
-  const handleDeleteQnA = async (id) => {
-    if (!confirm("למחוק את השאלה?")) return;
-
-    try {
-      await base44.entities.QnA.delete(id);
-      refetchQnA();
-      toast.success("השאלה נמחקה");
-    } catch (error) {
-      toast.error("שגיאה במחיקה");
-    }
-  };
-
-  const handleEditQnA = (qna) => {
-    setEditingQnA(qna);
-    setQnaForm({
-      question: qna.question,
-      answer: qna.answer,
-      category: qna.category,
-      tags: qna.tags || [],
-      attachment_url: qna.attachment_url || "",
-      is_published: qna.is_published !== false,
-    });
-    setShowQnADialog(true);
-  };
-
-  const addTag = () => {
-    if (newTag.trim() && !qnaForm.tags.includes(newTag.trim())) {
-      setQnaForm(prev => ({ ...prev, tags: [...prev.tags, newTag.trim()] }));
-      setNewTag("");
-    }
-  };
-
-  const removeTag = (tag) => {
-    setQnaForm(prev => ({ ...prev, tags: prev.tags.filter(t => t !== tag) }));
-  };
 
   // User management
   const handleInviteUser = async () => {
@@ -305,85 +209,16 @@ export default function AdminSettings() {
             <Settings className="w-8 h-8" />
             הגדרות מערכת
           </h1>
-          <p className="text-slate-600 mt-1">ניהול שאלות נפוצות, משתמשים ודוחות</p>
+          <p className="text-slate-600 mt-1">ניהול משתמשים ודוחות</p>
         </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full max-w-xl">
-          <TabsTrigger value="qna">שאלות נפוצות</TabsTrigger>
+        <TabsList className="grid grid-cols-3 w-full max-w-lg">
           <TabsTrigger value="users">משתמשים</TabsTrigger>
           <TabsTrigger value="reports">דוחות</TabsTrigger>
           <TabsTrigger value="guide">מדריך</TabsTrigger>
         </TabsList>
-
-        {/* Q&A Management */}
-        <TabsContent value="qna" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-xl font-semibold">ניהול שאלות ותשובות ({qnas.length})</h2>
-            <Button onClick={() => {
-              setEditingQnA(null);
-              setQnaForm({
-                question: "",
-                answer: "",
-                category: "general",
-                tags: [],
-                attachment_url: "",
-                is_published: true,
-              });
-              setShowQnADialog(true);
-            }} className="bg-blue-600 hover:bg-blue-700">
-              <Plus className="w-4 h-4 ml-2" />
-              הוספת שאלה
-            </Button>
-          </div>
-
-          <Card>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-right">שאלה</TableHead>
-                    <TableHead className="text-right">קטגוריה</TableHead>
-                    <TableHead className="text-right">צפיות</TableHead>
-                    <TableHead className="text-right">סטטוס</TableHead>
-                    <TableHead className="text-right">פעולות</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {qnas.map((qna) => (
-                    <TableRow key={qna.id}>
-                      <TableCell className="max-w-[300px]">
-                        <p className="font-medium truncate">{qna.question}</p>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          {categoryConfig[qna.category]?.label || qna.category}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{qna.view_count || 0}</TableCell>
-                      <TableCell>
-                        <Badge className={qna.is_published !== false ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-600"}>
-                          {qna.is_published !== false ? "פורסם" : "טיוטה"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEditQnA(qna)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm" className="text-red-600" onClick={() => handleDeleteQnA(qna.id)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </Card>
-        </TabsContent>
 
         {/* Users Management */}
         <TabsContent value="users" className="space-y-4">
@@ -547,13 +382,6 @@ export default function AdminSettings() {
                 <li>תפקידים: סטודנט (רגיל), מתרגל (גישה לפניות מוקצות), מנהל (גישה מלאה)</li>
               </ul>
 
-              <h3>שאלות נפוצות</h3>
-              <ul>
-                <li>הוסיפו שאלות חדשות עם קטגוריה ותגיות מתאימות</li>
-                <li>ניתן לשמור כטיוטה לפני פרסום</li>
-                <li>השאלות הנצפות ביותר מוצגות בדף הבית</li>
-              </ul>
-
               <h3>דוחות</h3>
               <ul>
                 <li>צפו בסטטיסטיקות לפי קטגוריה ומתרגל</li>
@@ -563,105 +391,6 @@ export default function AdminSettings() {
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Q&A Dialog */}
-      <Dialog open={showQnADialog} onOpenChange={setShowQnADialog}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingQnA ? "עריכת שאלה" : "הוספת שאלה חדשה"}</DialogTitle>
-          </DialogHeader>
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label>שאלה *</Label>
-              <Input
-                value={qnaForm.question}
-                onChange={(e) => setQnaForm(prev => ({ ...prev, question: e.target.value }))}
-                placeholder="מהי השאלה?"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>תשובה *</Label>
-              <Textarea
-                value={qnaForm.answer}
-                onChange={(e) => setQnaForm(prev => ({ ...prev, answer: e.target.value }))}
-                placeholder="התשובה לשאלה..."
-                className="min-h-[150px]"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>קטגוריה</Label>
-                <Select
-                  value={qnaForm.category}
-                  onValueChange={(v) => setQnaForm(prev => ({ ...prev, category: v }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(categoryConfig).map(([key, config]) => (
-                      <SelectItem key={key} value={key}>{config.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label>קישור/קובץ מצורף</Label>
-                <Input
-                  value={qnaForm.attachment_url}
-                  onChange={(e) => setQnaForm(prev => ({ ...prev, attachment_url: e.target.value }))}
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>תגיות</Label>
-              <div className="flex gap-2">
-                <Input
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="תגית חדשה"
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                />
-                <Button type="button" variant="outline" onClick={addTag}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {qnaForm.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1">
-                    {tag}
-                    <X className="w-3 h-3 cursor-pointer" onClick={() => removeTag(tag)} />
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <Switch
-                checked={qnaForm.is_published}
-                onCheckedChange={(checked) => setQnaForm(prev => ({ ...prev, is_published: checked }))}
-              />
-              <Label>פרסם מיד</Label>
-            </div>
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowQnADialog(false)}>
-              ביטול
-            </Button>
-            <Button onClick={handleSaveQnA} className="bg-blue-600 hover:bg-blue-700">
-              <Save className="w-4 h-4 ml-2" />
-              שמירה
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* Invite Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
