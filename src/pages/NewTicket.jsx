@@ -313,6 +313,7 @@ export default function NewTicket() {
                     <SelectItem value="דניאל">דניאל</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.assigned_ta && <p className="text-red-500 text-sm">{errors.assigned_ta}</p>}
               </div>
 
               <div className="space-y-2">

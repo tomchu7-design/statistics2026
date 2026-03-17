@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
         zoomDetails,
         ``,
         `תודה, סגל הקורס`,
-      ].join('\n');
+      ].join(NL);
 
       const taBody = [
         `שלום ${taName},`,
@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
         zoomDetails,
         ``,
         `בהצלחה!`,
-      ].join('\n');
+      ].join(NL);
 
       await sendEmail(base44, studentEmail, `נקבעה שעת קבלה לקורס סטטיסטיקה`, studentBody);
       await sendEmail(base44, taEmail, `נקבעה שעת קבלה חדשה לקורס סטטיסטיקה`, taBody);
