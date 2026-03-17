@@ -90,7 +90,6 @@ Deno.serve(async (req) => {
         `קטגוריה: ${categoryLabel || category}`,
         assignedTa ? `מתרגלת: ${assignedTa}` : null,
         ``,
-        `אנא שמרי את מספר הפנייה לצורך מעקב.`,
         `מענה לפנייתך יישלח ישירות למייל זה.`,
         ``,
         `תודה, סגל הקורס`,
