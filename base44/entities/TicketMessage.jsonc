@@ -1,0 +1,37 @@
+{
+  "name": "TicketMessage",
+  "type": "object",
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05e4\u05e0\u05d9\u05d9\u05d4"
+    },
+    "author_email": {
+      "type": "string",
+      "description": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05d4\u05db\u05d5\u05ea\u05d1"
+    },
+    "author_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05db\u05d5\u05ea\u05d1"
+    },
+    "message": {
+      "type": "string",
+      "description": "\u05ea\u05d5\u05db\u05df \u05d4\u05d4\u05d5\u05d3\u05e2\u05d4"
+    },
+    "is_internal_note": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u05d4\u05e2\u05e8\u05d4 \u05e4\u05e0\u05d9\u05de\u05d9\u05ea \u05dc\u05e6\u05d5\u05d5\u05ea \u05d1\u05dc\u05d1\u05d3"
+    },
+    "is_staff": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u05d4\u05d0\u05dd \u05d4\u05db\u05d5\u05ea\u05d1 \u05de\u05e6\u05d5\u05d5\u05ea \u05d4\u05e7\u05d5\u05e8\u05e1"
+    }
+  },
+  "required": [
+    "ticket_id",
+    "author_email",
+    "message"
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "name": "Appointment",
+  "type": "object",
+  "properties": {
+    "student_email": {
+      "type": "string",
+      "description": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05d4\u05e1\u05d8\u05d5\u05d3\u05e0\u05d8"
+    },
+    "student_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05e1\u05d8\u05d5\u05d3\u05e0\u05d8"
+    },
+    "ta_email": {
+      "type": "string",
+      "description": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05d4\u05de\u05ea\u05e8\u05d2\u05dc"
+    },
+    "ta_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05de\u05ea\u05e8\u05d2\u05dc"
+    },
+    "availability_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05d6\u05de\u05d9\u05e0\u05d5\u05ea"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u05ea\u05d0\u05e8\u05d9\u05da"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "\u05e9\u05e2\u05ea \u05d4\u05ea\u05d7\u05dc\u05d4"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd"
+    },
+    "topic": {
+      "type": "string",
+      "enum": [
+        "course_admin",
+        "assignments",
+        "quiz",
+        "exam",
+        "statistics_content",
+        "excel",
+        "technical",
+        "other"
+      ],
+      "description": "\u05e0\u05d5\u05e9\u05d0 \u05d4\u05e4\u05d2\u05d9\u05e9\u05d4"
+    },
+    "notes": {
+      "type": "string",
+      "description": "\u05d4\u05e2\u05e8\u05d5\u05ea"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "booked",
+        "cancelled",
+        "completed"
+      ],
+      "default": "booked",
+      "description": "\u05e1\u05d8\u05d8\u05d5\u05e1"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "\u05e0\u05e9\u05dc\u05d7\u05d4 \u05ea\u05d6\u05db\u05d5\u05e8\u05ea"
+    }
+  },
+  "required": [
+    "student_email",
+    "student_name",
+    "ta_email",
+    "ta_name",
+    "date",
+    "start_time",
+    "end_time"
+  ]
+}

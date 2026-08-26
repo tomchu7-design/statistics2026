@@ -1,0 +1,66 @@
+{
+  "name": "TAAvailability",
+  "type": "object",
+  "properties": {
+    "ta_email": {
+      "type": "string",
+      "description": "\u05d0\u05d9\u05de\u05d9\u05d9\u05dc \u05d4\u05de\u05ea\u05e8\u05d2\u05dc"
+    },
+    "ta_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05de\u05ea\u05e8\u05d2\u05dc"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "\u05ea\u05d0\u05e8\u05d9\u05da"
+    },
+    "start_time": {
+      "type": "string",
+      "description": "\u05e9\u05e2\u05ea \u05d4\u05ea\u05d7\u05dc\u05d4 (HH:MM)"
+    },
+    "end_time": {
+      "type": "string",
+      "description": "\u05e9\u05e2\u05ea \u05e1\u05d9\u05d5\u05dd (HH:MM)"
+    },
+    "slot_duration": {
+      "type": "number",
+      "enum": [
+        10,
+        15,
+        20,
+        30
+      ],
+      "default": 15,
+      "description": "\u05de\u05e9\u05da \u05e4\u05d2\u05d9\u05e9\u05d4 \u05d1\u05d3\u05e7\u05d5\u05ea"
+    },
+    "location": {
+      "type": "string",
+      "description": "\u05de\u05d9\u05e7\u05d5\u05dd (\u05d7\u05d3\u05e8/\u05d6\u05d5\u05dd)"
+    },
+    "zoom_link": {
+      "type": "string",
+      "description": "\u05e7\u05d9\u05e9\u05d5\u05e8 \u05d6\u05d5\u05dd \u05dc\u05e4\u05d2\u05d9\u05e9\u05d4"
+    },
+    "zoom_meeting_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05e4\u05d2\u05d9\u05e9\u05ea \u05d6\u05d5\u05dd"
+    },
+    "zoom_password": {
+      "type": "string",
+      "description": "\u05e1\u05d9\u05e1\u05de\u05ea \u05e4\u05d2\u05d9\u05e9\u05ea \u05d6\u05d5\u05dd"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "\u05e4\u05e2\u05d9\u05dc"
+    }
+  },
+  "required": [
+    "ta_email",
+    "ta_name",
+    "date",
+    "start_time",
+    "end_time"
+  ]
+}

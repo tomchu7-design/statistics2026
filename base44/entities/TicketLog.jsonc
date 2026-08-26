@@ -1,0 +1,38 @@
+{
+  "name": "TicketLog",
+  "type": "object",
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "description": "\u05de\u05d6\u05d4\u05d4 \u05d4\u05e4\u05e0\u05d9\u05d9\u05d4"
+    },
+    "action": {
+      "type": "string",
+      "enum": [
+        "created",
+        "assigned",
+        "status_changed",
+        "forwarded",
+        "message_added"
+      ],
+      "description": "\u05e4\u05e2\u05d5\u05dc\u05d4"
+    },
+    "actor_email": {
+      "type": "string",
+      "description": "\u05de\u05d1\u05e6\u05e2 \u05d4\u05e4\u05e2\u05d5\u05dc\u05d4"
+    },
+    "actor_name": {
+      "type": "string",
+      "description": "\u05e9\u05dd \u05d4\u05de\u05d1\u05e6\u05e2"
+    },
+    "details": {
+      "type": "string",
+      "description": "\u05e4\u05e8\u05d8\u05d9\u05dd \u05e0\u05d5\u05e1\u05e4\u05d9\u05dd"
+    }
+  },
+  "required": [
+    "ticket_id",
+    "action",
+    "actor_email"
+  ]
+}
